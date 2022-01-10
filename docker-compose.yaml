@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.0
+    hostname: zookeeper
+    container_name: zookeeper
+    restart: unless-stopped
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    extra_hosts:
+      - "moby:127.0.0.1"
+    networks:
+      - dp-net
+
+  kafka:
+    image: confluentinc/cp-kafka:5.2.0
+    hostname: kafka
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    extra_hosts:
+      - "moby:127.0.0.1"
+    networks:
+     - dp-net
+    
+  dps-api:
+    build:
+      context: ./dps-api
+      dockerfile: ./Dockerfile
+    container_name: dps-api
+    restart: unless-stopped
+    volumes:
+      - ./dps-api/app/:/app/
+    ports:
+     - 9000:3030
+    depends_on:
+      - zookeeper
+      - kafka
+    command: sh -c "python3 main.py"
+    networks:
+     - dp-net
+  
+  dps-jypyter:
+    build:
+      context: ./dps-jupyter
+      dockerfile: ./Dockerfile 
+    restart: unless-stopped
+    ports:
+      - 8888:8888
+    depends_on:
+      - zookeeper
+      - kafka
+      - dps-api
+    networks:
+     - dp-net
+   
+    
+
+
+    
+networks:
+  dp-net:
