@@ -37,6 +37,92 @@ services:
     networks:
       - dp-net
 
+  spark-master:
+    image: cluster-apache-spark:3.0.2
+    container_name: spark-master
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+      - kafka
+    volumes:
+      - nas-share:/mnt/nas
+      - ./dps-spark/apps:/opt/spark-apps
+      - ./dps-spark/data:/opt/spark-data
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+    networks:
+     - dp-net
+  
+  spark-worker-a:
+    image: cluster-apache-spark:3.0.2
+    ports:
+      - "8081:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+      - zookeeper
+      - kafka
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+      - nas-share:/mnt/nas
+      - ./dps-spark/apps:/opt/spark-apps
+      - ./dps-spark/data:/opt/spark-data
+    networks:
+      - dp-net
+  
+  spark-worker-b:
+    image: cluster-apache-spark:3.0.2
+    ports:
+      - "8082:8080"
+      - "7002:7000"
+    depends_on:
+      - spark-master
+      - zookeeper
+      - kafka
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-b
+    volumes:
+      - nas-share:/mnt/nas
+      - ./dps-spark/apps:/opt/spark-apps
+      - ./dps-spark/data:/opt/spark-data
+
+    networks:
+      - dp-net
+  
+  dps-jypyter:
+    build:
+      context: ./dps-jupyter
+      dockerfile: ./Dockerfile 
+    container_name: dps-jupyter
+    restart: unless-stopped
+    volumes:
+      - ./dps-jupyter/work/:/home/jovyan/
+    ports:
+      - 8888:8888
+    depends_on:
+      - zookeeper
+      - kafka
+      - spark
+    networks:
+     - dp-net
+
   # dps-api:
   #   build:
   #     context: ./dps-api
@@ -53,58 +139,16 @@ services:
   #   command: sh -c "uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
   #   networks:
   #    - dp-net
+  # - ./dps-spark/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar:/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar
 
-  spark-master:
-    image: bde2020/spark-master:3.2.0-hadoop3.2
-    container_name: spark-master
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-    volumes:
-      - ./dps-spark/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar:/spark/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar
-    depends_on:
-      - zookeeper
-      - kafka
-    environment:
-      - INIT_DAEMON_STEP=setup_spark
-    networks:
-     - dp-net
-
-  spark-worker-1:
-    image: bde2020/spark-worker:3.2.0-hadoop3.2
-    container_name: spark-worker-1
-    restart: unless-stopped
-    depends_on:
-      - spark-master
-      - zookeeper
-      - kafka
-    volumes:
-      - ./dps-spark/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar:/spark/jars/spark-sql-kafka-0-10_2.12-3.0.2.jar
-    ports:
-      - "8081:8081"
-    environment:
-      - "SPARK_MASTER=spark://spark-master:7077"
-    networks:
-     - dp-net
-  
-  dps-jypyter:
-    build:
-      context: ./dps-jupyter
-      dockerfile: ./Dockerfile 
-    container_name: dps-jupyter
-    restart: unless-stopped
-    volumes:
-      - ./dps-jupyter/work/:/home/jovyan/
-    ports:
-      - 8888:8888
-    depends_on:
-      - zookeeper
-      - kafka
-      # - dps-api
-      - spark-master
-    networks:
-     - dp-net
-    
 networks:
   dp-net:
+
+volumes: 
+  # spark-apps:
+  # spark-data:
+  nas-share:
+    driver_opts:
+      type: cifs
+      o: user=duynn_1,domain=digi-texx.local,password=Texx#3211,rw
+      device: //10.1.1.107/dwh/raw
