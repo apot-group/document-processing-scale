@@ -51,4 +51,6 @@ ln -sf /dev/stdout $SPARK_WORKER_LOG
 
 COPY start-spark.sh /
 
+COPY ./jars/* /opt/spark/jars/
+
 CMD ["/bin/bash", "/start-spark.sh"]

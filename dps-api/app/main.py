@@ -1,19 +1,35 @@
-from fastapi import FastAPI
-import uvicorn
-import nltk
-nltk.download('vader_lexicon')
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import json
+import asyncio
+from fastapi import FastAPI 
+from aiokafka import AIOKafkaProducer
+from settings import config
+from api.entities.producer import ProducerMessage, ProducerResponse
 
 
-app = FastAPI(title="PROJECT_NAME", openapi_url="/api/openapi.json", docs_url="/api/docs")
-sid = SentimentIntensityAnalyzer()
+app = FastAPI(title=config.PROJECT_NAME, 
+              openapi_url="/api/openapi.json", docs_url="/api/docs")
 
-@app.post("/predict")    
-def predict(data: str):
-    data = str({"data": data})
-    result = sid.polarity_scores(data)
-    return result
- 
 
-if __name__ == "__main__":
-    uvicorn.run("main:app",host='0.0.0.0', port=3030, reload=True, debug=True)
+loop = asyncio.get_event_loop()
+aioproducer = AIOKafkaProducer(
+    loop=loop, client_id=config.PROJECT_NAME, bootstrap_servers=config.KAFKA_INSTANCE
+)
+
+@app.on_event("startup")
+async def startup_event():
+    await aioproducer.start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await aioproducer.stop()
+
+
+@app.post("/producer/{topicname}")
+async def kafka_produce(msg: ProducerMessage, topicname: str):
+    await aioproducer.send(topicname, json.dumps(msg.dict()).encode("ascii"))
+    response = ProducerResponse(
+        name=msg.name, message_id=msg.message_id, topic=topicname
+    )
+    return response
+

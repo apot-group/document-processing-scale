@@ -8,14 +8,6 @@ from confluent_kafka.admin import AdminClient, NewTopic
 
 
 bootstrap_servers='kafka:9092'
-admin_client = AdminClient({
-    "bootstrap.servers": bootstrap_servers
-})
-topic_list = []
-topic_1='kafka-sample'
-topic_list.append(NewTopic(topic_1, 1, 1))
-admin_client.create_topics(topic_list)
-
 
 user_ids = list(range(1, 101))
 recipient_ids = list(range(1, 101))
@@ -39,10 +31,10 @@ def generate_message() -> dict:
     recipient_ids_copy.remove(random_user_id)
     random_recipient_id = random.choice(recipient_ids_copy)
     return {
-        'time': str(datetime.now()),
-        'user_id': random_user_id,
-        'recipient_id': random_recipient_id,
-        'data': {"image_path": "./demo/data/test.jpeg"}
+        # 'time': str(datetime.now()),
+        # 'user_id': random_user_id,
+        # 'recipient_id': random_recipient_id,
+        'data': "test"
     }
 
 if __name__ == '__main__':
@@ -61,5 +53,5 @@ if __name__ == '__main__':
         time_to_sleep = 5
         time.sleep(time_to_sleep)
         i += 1
-        if i == 10:
+        if i == 100:
             break

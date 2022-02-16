@@ -10,3 +10,17 @@ python3 producer.py
 python3 producer.py 
 python3 producer.py 
 python3 producer.py 
+cd demo/kafka-sample/
+python producer.py 
+cd demo/kafka-sample/
+python producer.py 
+python producer.py 
+python producer.py 
+cd demo/kafka-sample/
+python3 create_topic.py 
+python3 producer.py 
+python3 producer.py 
+cd demo/kafka-sample/
+python3 producer.py 
+python3 producer.py 
+python3 producer.py 
