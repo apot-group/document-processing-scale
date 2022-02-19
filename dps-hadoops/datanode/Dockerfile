@@ -1,6 +1,6 @@
 FROM duynguyenngoc/dps-hadoop-base:3.3.1
 
-MAINTAINER Duy Nguyen <duynguyenngoc@hotmail.com>
+LABEL MAINTAINER Duy Nguyen <duynguyenngoc@hotmail.com>
 
 HEALTHCHECK CMD curl -f http://localhost:9864/ || exit 1
 

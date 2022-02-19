@@ -1,6 +1,6 @@
 FROM debian:9
 
-MAINTAINER Duy Nguyen <duynguyenngoc@hotmail.com>
+LABEL MAINTAINER Duy Nguyen <duynguyenngoc@hotmail.com>
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       openjdk-8-jdk \
