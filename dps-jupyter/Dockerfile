@@ -1,7 +1,7 @@
 FROM jupyter/pyspark-notebook
 LABEL author="Duy Nguyen"
 USER root
-RUN pip install findspark confluent_kafka pyspark nltk
+
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID
 
