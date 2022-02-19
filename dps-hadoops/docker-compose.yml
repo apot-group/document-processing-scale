@@ -1,20 +1,8 @@
-version: "3"
+version: '3.8'
 
 services:
-
-  db:
-    image: postgres:13.1
-    environment: 
-      - POSTGRES_PASSWORD=1q2w3e4r
-      - POSTGRES_DB=dps
-    volumes:
-      - ./dps-db/dbdata:/var/lib/postgresql/data
-    ports: 
-      - 5432:5432
-
-
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    image: duynguyenngoc/dps-hadoop-namenode:3.3.1
     container_name: namenode
     restart: always
     ports:
@@ -28,7 +16,7 @@ services:
       - ./hadoop.env
 
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    image: duynguyenngoc/dps-hadoop-datanode:3.3.1
     container_name: datanode
     restart: always
     volumes:
@@ -37,9 +25,9 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop.env
-  
+
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    image: duynguyenngoc/dps-hadoop-resourcemanager:3.3.1
     container_name: resourcemanager
     restart: always
     environment:
@@ -47,17 +35,17 @@ services:
     env_file:
       - ./hadoop.env
 
-  nodemanager1:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+  nodemanager:
+    image: duynguyenngoc/dps-hadoop-nodemanager:3.3.1
     container_name: nodemanager
     restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
       - ./hadoop.env
-  
+
   historyserver:
-    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    image: duynguyenngoc/dps-hadoop-historyserver:3.3.1
     container_name: historyserver
     restart: always
     environment:
@@ -66,7 +54,7 @@ services:
       - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
       - ./hadoop.env
-  
+
 volumes:
   hadoop_namenode:
   hadoop_datanode:
