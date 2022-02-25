@@ -4,7 +4,12 @@ on:
     branches:
       - main
     paths:
-      - './dps-airflow/**'
+      - 'dps-jupyter/**'
+  pull_request:
+    branches:
+      - main
+    paths: 
+      - 'dps-jupyter/**'
 
 env:
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }} # dockerhub pass
@@ -27,7 +32,7 @@ jobs:
       # [Step-3] buid and tag image from Dockerfile
       - name: Build docker image
         run: |
-          docker build -t $IMAGE --no-cache ./dps-airflow/
+          docker build -t $IMAGE --no-cache ./dps-jupyter/
       # [Step-4] Push image to docker hub
       - name: Push image to DockerHub
         run: |
