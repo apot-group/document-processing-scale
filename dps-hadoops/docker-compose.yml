@@ -55,6 +55,13 @@ services:
     env_file:
       - ./hadoop.env
   
+  # jypyter:
+  #   image: jupyter/pyspark-notebook
+  #   container_name: jupyter
+  #   restart: always
+  #   ports:
+  #     - 8888:8888
+
 volumes:
   hadoop_namenode:
   hadoop_datanode:

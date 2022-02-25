@@ -1,11 +1,15 @@
-FROM jupyter/pyspark-notebook
-LABEL author="Duy Nguyen"
-USER root
+FROM python:3.8.5
 
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_UID
+LABEL author="Duy Nguyen"
+
+WORKDIR /
 
 COPY ./requirements.txt ./requirements.txt 
+
+RUN pip install jupyterlab
+
 RUN pip install -r requirements.txt
 
-ENV JUPYTER_ENABLE_LAB="yes"
+EXPOSE 8888
+
+ENTRYPOINT ["jupyter", "lab"]

@@ -47,7 +47,6 @@ services:
       - zookeeper
       - kafka
     volumes:
-      - nas-share:/mnt/nas
       - ./dps-spark/apps/:/opt/spark-apps
       - ./dps-spark/data/:/opt/spark-data
     ports:
@@ -79,7 +78,6 @@ services:
       - SPARK_WORKLOAD=worker
       - SPARK_LOCAL_IP=spark-worker-a
     volumes:
-      - nas-share:/mnt/nas
       - ./dps-spark/apps/:/opt/spark-apps
       - ./dps-spark/data/:/opt/spark-data
     networks:
@@ -102,31 +100,31 @@ services:
     networks:
      - dp-net
 
-  dps-api:
-    build:
-      context: ./dps-api
-      dockerfile: ./Dockerfile
-    container_name: dps-api
-    restart: unless-stopped
-    volumes:
-      - ./dps-api/app/:/app/
-      - nas-share:/mnt/nas
-    ports:
-     - 9000:8080
-    depends_on:
-      - zookeeper
-      - kafka
-      - spark-master
-    command: sh -c "uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
-    networks:
-     - dp-net
+  # dps-api:
+  #   build:
+  #     context: ./dps-api
+  #     dockerfile: ./Dockerfile
+  #   container_name: dps-api
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./dps-api/app/:/app/
+  #     - nas-share:/mnt/nas
+  #   ports:
+  #    - 9000:8080
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #     - spark-master
+  #   command: sh -c "uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
+  #   networks:
+  #    - dp-net
 
-volumes: 
-  nas-share:
-    driver_opts:
-      type: cifs
-      o: user=duynn_1,domain=digi-texx.local,password=Texx#3211,rw
-      device: //10.1.1.107/dwh/raw
+# volumes: 
+#   nas-share:
+#     driver_opts:
+#       type: cifs
+#       o: user=duynn_1,domain=digi-texx.local,password=Texx#3211,rw
+#       device: //10.1.1.107/dwh/raw
 
 networks:
   dp-net:
