@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8888
 
-ENTRYPOINT ["jupyter", "lab"]
+ENTRYPOINT ["jupyter", "lab", "--allow-root"]
