@@ -44,9 +44,7 @@ services:
       - dp-net
   
   dps-jypyter:
-    build:
-      context: ./dps-jupyter
-      dockerfile: ./Dockerfile
+    image: duynguyenngoc/dps-jupyter-lab:3.3.1
     container_name: dps-jupyter
     restart: unless-stopped
     volumes:
