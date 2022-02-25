@@ -27,7 +27,7 @@ jobs:
       # [Step-3] buid and tag image from Dockerfile
       - name: Build docker image
         run: |
-          docker build -t $IMAGE --no-cache ./dps-hadoop-spark/
+          docker build -t $IMAGE --no-cache ./dps-spark/
       # [Step-4] Push image to docker hub
       - name: Push image to DockerHub
         run: |
