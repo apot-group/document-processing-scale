@@ -1,10 +1,5 @@
 name: DEPLOY_PRODUCTION
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'dps-jupyter/**'
   pull_request:
     branches:
       - main
