@@ -9,7 +9,7 @@ WORKDIR /usr/local/airflow
 
 COPY ./requirements.txt requirements.txt
 
-COPY ./airflow/ /usr/local/airflow/
+COPY ./app/ /usr/local/airflow/
 
 RUN pip3 install apache-airflow[crypto,password,ssh]==2.2.0
 
