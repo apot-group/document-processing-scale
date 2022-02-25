@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dps-db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: dps-db-deployment
+  template:
+    metadata:
+      labels:
+        type: dps-db-deployment
+    spec:
+      containers:
+      - name: dps-db-deployment
+        image: postgres:13.1
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 5432
+        env:
+          - name: POSTGRES_DB
+            value: dpsdb
+          - name: POSTGRES_USER
+            value: dps
+          - name: POSTGRES_PASSWORD
+            value: 1q2w3e4r
+
+---     
+apiVersion: v1
+kind: Service
+metadata:
+  name: dps-db-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    type: dps-db-deployment

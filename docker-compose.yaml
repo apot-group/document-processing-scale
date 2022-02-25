@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.2.0
     hostname: zookeeper
@@ -31,46 +32,99 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
     extra_hosts:
       - "moby:127.0.0.1"
     networks:
-     - dp-net
-    
-  dps-api:
-    build:
-      context: ./dps-api
+      - dp-net
+
+  spark-master:
+    build: 
+      context: ./dps-spark
       dockerfile: ./Dockerfile
-    container_name: dps-api
+    container_name: spark-master
     restart: unless-stopped
-    volumes:
-      - ./dps-api/app/:/app/
-    ports:
-     - 9000:3030
     depends_on:
       - zookeeper
       - kafka
-    command: sh -c "python3 main.py"
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
     networks:
      - dp-net
+  
+  spark-worker-a:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    ports:
+      - "8081:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+      - zookeeper
+      - kafka
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    networks:
+      - dp-net
   
   dps-jypyter:
     build:
       context: ./dps-jupyter
       dockerfile: ./Dockerfile 
+    container_name: dps-jupyter
     restart: unless-stopped
+    volumes:
+      - ./dps-jupyter/work/:/home/jovyan/
     ports:
       - 8888:8888
     depends_on:
       - zookeeper
       - kafka
-      - dps-api
+      - spark-master
     networks:
      - dp-net
-   
-    
 
+  # dps-api:
+  #   build:
+  #     context: ./dps-api
+  #     dockerfile: ./Dockerfile
+  #   container_name: dps-api
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./dps-api/app/:/app/
+  #     - nas-share:/mnt/nas
+  #   ports:
+  #    - 9000:8080
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #     - spark-master
+  #   command: sh -c "uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
+  #   networks:
+  #    - dp-net
 
-    
+# volumes: 
+#   nas-share:
+#     driver_opts:
+#       type: cifs
+#       o: user=duynn_1,domain=digi-texx.local,password=Texx#3211,rw
+#       device: //10.1.1.107/dwh/raw
+
 networks:
   dp-net:

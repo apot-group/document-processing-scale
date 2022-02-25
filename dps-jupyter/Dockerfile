@@ -1,12 +1,15 @@
-FROM jupyter/pyspark-notebook
+FROM python:3.8.5
+
 LABEL author="Duy Nguyen"
-USER root
-RUN pip install findspark confluent_kafka pyspark nltk
-# Switch back to jovyan to avoid accidental container runs as root
-USER $NB_UID
 
-ENV JUPYTER_ENABLE_LAB="yes"
+WORKDIR /
 
-#Assume current directory is the folder where this Dockerfile resides
-COPY --chown=jovyan:users ./spark_demo.ipynb /home/jovyan/work
-COPY ./jars/spark-sql-kafka-0-10_2.12-3.0.0.jar /opt/conda/lib/python3.8/site-packages/pyspark/jars
+COPY ./requirements.txt ./requirements.txt 
+
+RUN pip install jupyterlab
+
+RUN pip install -r requirements.txt
+
+EXPOSE 8888
+
+ENTRYPOINT ["jupyter", "lab"]

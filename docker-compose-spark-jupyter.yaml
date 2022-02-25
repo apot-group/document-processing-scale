@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+
+  spark-master:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    container_name: spark-master
+    restart: unless-stopped
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+    networks:
+     - dp-net
+  
+  spark-worker-b:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:8080"
+      - "7002:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=6
+      - SPARK_WORKER_MEMORY=6G
+      - SPARK_DRIVER_MEMORY=6G
+      - SPARK_EXECUTOR_MEMORY=6G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-b
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    networks:
+      - dp-net
+  
+  dps-jypyter:
+    build:
+      context: ./dps-jupyter
+      dockerfile: ./Dockerfile
+    container_name: dps-jupyter
+    restart: unless-stopped
+    volumes:
+      - ./dps-jupyter/work/:/home/jovyan/
+    ports:
+      - 8888:8888
+    depends_on:
+      - spark-worker-a
+      - spark-master
+    networks:
+     - dp-net
+
+networks:
+  dp-net:
