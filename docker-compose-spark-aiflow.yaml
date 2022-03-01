@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+
+  airflow:
+    image: duynguyenngoc/dps-hadoop-airflow:3.3.1
+    volumes:
+      - ./dps-airflow/app/:/airflow/
+      - ./dps-spark/apps/:/sparks/
+    environment:
+      - AIRFLOW_HOME=/airflow
+      - AIRFLOW_UID=50000
+    ports:
+      - 3000:8080
+    command: airflow standalone
+    networks:
+      - dp-net     
+
+  spark-master:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    container_name: spark-master
+    restart: unless-stopped
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+    networks:
+     - dp-net
+  
+  spark-worker-b:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:8080"
+      - "7002:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_DRIVER_MEMORY=2G
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-b
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    networks:
+      - dp-net
+  
+  spark-worker-a:
+    build: 
+      context: ./dps-spark
+      dockerfile: ./Dockerfile
+    ports:
+      - "8081:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_DRIVER_MEMORY=2G
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+      - ./dps-spark/apps/:/opt/spark-apps
+      - ./dps-spark/data/:/opt/spark-data
+    networks:
+      - dp-net
+
+networks:
+  dp-net:

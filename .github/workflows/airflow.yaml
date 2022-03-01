@@ -9,7 +9,7 @@ on:
 env:
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }} # dockerhub pass
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # dockerhub user
-  IMAGE: duynguyenngoc/dps-airflow:3.3.1 # Image docker
+  IMAGE: duynguyenngoc/dps-hadoop-airflow:3.3.1 # Image docker
 
 jobs:
   build:
