@@ -1,6 +1,7 @@
-name: DEPLOY_PRODUCTION
+name: DEPLOY_AIRFLOW
 on:
   pull_request:
+    types: [closed]
     branches:
       - main
     paths: 

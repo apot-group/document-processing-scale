@@ -1,4 +1,4 @@
-name: DEPLOY_PRODUCTION
+name: DEPLOY_JUPYTER
 on:
   pull_request:
     types: [closed]
