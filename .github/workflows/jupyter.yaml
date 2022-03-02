@@ -1,6 +1,7 @@
 name: DEPLOY_PRODUCTION
 on:
   pull_request:
+    types: [closed]
     branches:
       - main
     paths: 
