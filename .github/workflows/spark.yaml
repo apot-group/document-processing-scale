@@ -1,6 +1,7 @@
-name: DEPLOY_PRODUCTION
+name: DEPLOY_SPARK
 on:
   pull_request:
+    types: [closed]
     branches:
       - main
     paths: 
