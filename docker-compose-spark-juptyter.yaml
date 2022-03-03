@@ -22,9 +22,11 @@ services:
   # Spark worker
   spark-worker-a:
     image: duynguyenngoc/dps-hadoop-spark:3.3.1
+    container_name: spark-worker-a
     ports:
       - "8081:8080"
       - "7001:7000"
+    restart: unless-stopped
     environment:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=2
